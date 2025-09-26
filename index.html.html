@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+  <title>Foodie Delight - Online Food Ordering</title>
+   <link rel="stylesheet" href="rrr.css">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f6f6; }
+    header { background: #ff7043; color: #fff; padding: 20px 0; text-align: center; }
+    h1 { margin: 0; }
+    .container { max-width: 900px; margin: 30px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 24px; }
+    .menu { display: flex; flex-wrap: wrap; gap: 24px; }
+    .menu-item { flex: 1 1 250px; background: #f9f9f9; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px #0001; display: flex; flex-direction: column; align-items: center; }
+    .menu-item img { width: 120px; height: 90px; object-fit: cover; border-radius: 4px; }
+    .menu-item h3 { margin: 12px 0 6px; }
+    .menu-item button { background: #ff7043; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
+    .menu-item button:hover { background: #ff5722; }
+    .cart { margin-top: 32px; }
+    .cart ul { list-style: none; padding: 0; }
+    .cart li { margin-bottom: 8px; }
+    .cart-total { font-weight: bold; margin-top: 12px; }
+    .checkout-btn { background: #43a047; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    .checkout-btn:hover { background: #388e3c; }
+    .hidden { display: none; }
+    .success { color: #388e3c; font-size: 1.2em; margin: 20px 0; }
+    /* Feedback section */
+    .feedback-section { margin-top: 40px; }
+    .feedback-section textarea { width: 100%; min-height: 60px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
+    .feedback-section button { background: #1976d2; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
+    .feedback-section button:hover { background: #1565c0; }
+    .reviews { margin-top: 24px; }
+    .review { background: #f1f8e9; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; }
+    @media (max-width: 700px) {
+      .menu { flex-direction: column; }
+      .container { padding: 12px; }
+}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Foodie Delight</h1>
+    <p>Order your favorite food online!</p>
+  </header>
+
+  <!-- Welcome message below header -->
+  <div id="WelcomeMessage" style="text-align:center; margin: 10px 0; font-size: 1.2em; color: #333;"></div>
+
+  <div class="container">
+    <!-- Search Bar -->
+    <input type="text" id="search-input" placeholder="Search for dishes..." style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 1em; border-radius: 4px; border: 1px solid #ccc;">
+
+    <!-- Food Menu -->
+    <h2>Menu</h2>
+    <div class="menu" id="menu">
+      <!-- Menu items will be injected here -->
+    </div>
+ <!-- Cart -->
+    <div class="cart" id="cart-section">
+      <h2>Your Cart</h2>
+      <ul id="cart-list"></ul>
+      <div class="cart-total" id="cart-total">Total: ₹0</div>
+      <button class="checkout-btn" id="checkout-btn" disabled>Proceed to Payment</button>
+    </div>
+<!-- Payment Modal -->
+    <div id="payment-modal" class="hidden">
+      <h2>Payment</h2>
+      <form id="payment-form">
+        <label>
+          Card Number:
+          <input type="text" required maxlength="16" pattern="\d{16}" placeholder="1234 5678 9012 3456">
+        </label><br><br>
+        <label>
+          Expiry:
+          <input type="text" required maxlength="5" pattern="\d{2}/\d{2}" placeholder="MM/YY">
+        </label><br><br>
+        <label>
+          CVV:
+          <input type="password" required maxlength="3" pattern="\d{3}" placeholder="123">
+        </label><br><br>
+        <button type="submit" class="checkout-btn">Pay Now</button>
+        <button type="button" onclick="closePayment()" style="margin-left:10px;">Cancel</button>
+      </form>
+    </div>
+    <div id="payment-success" class="success hidden">
+      <strong>Payment Successful!</strong> Thank you for your order.
+    </div>
+ <!-- Feedback & Reviews -->
+    <div class="feedback-section">
+      <h2>Feedback & Reviews</h2>
+      <form id="feedback-form">
+        <textarea required placeholder="Write your feedback or review here..."></textarea><br>
+        <button type="submit">Submit Feedback</button>
+      </form>
+      <div class="reviews" id="reviews">
+        <!-- Reviews will appear here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample menu data
+    const menuItems = [
+      { id: 1, name:  "Pizza", price: 299, img: "jj.jpg" },
+      { id: 2, name: "Veg Burger", price: 149, img: "ab.jpg" },
+      { id: 3, name:"French Fries", price:99, img:"rr.jpg"},
+      { id: 4, name:"Chicken Burger", price:199, img:"aa.jpg"},
+      { id: 5, name:"chicken sandwitch", price:299, img:"kk.jpg"}, 
+      { id: 6, name: "Pasta", price: 249, img: "jj.jpg" },
+      { id: 7, name:"pani puri", price:99, img:"dd.jpg"},
+      { id: 8, name:"Ice Cream", price:199, img:"vv.jpg"},
+      { id: 9, name:"Milk Shake", price:199, img:"xx.jpg"},
+      { id: 10, name:"Chacolate Cake", price:499, img:"sa.jpg"},
+      { id: 11, name: "Chocolate Brownie", price: 99, img: "ww.jpg" },
+      { id: 12, name: "Special Coffee", price: 89, img: "nn.jpg" },
+      { id: 13, name: "Paneer Tikka Masala", price: 199, img: "qq.jpg" },
+      { id: 14, name: "Butter Chicken", price: 349, img:"yy.jpg" },
+      { id: 15, name:"Veg Meals", price:199, img:"oo.jpg"},
+      { id: 16, name:"Tiger Rice", price:59, img:"cc.jpg"},
+      { id: 17, name:"Egg Biryani", price:249, img:"pp.jpg"},
+      { id: 18, name:"Chicken Noddles", price:179, img:"ss.jpg"},
+      { id: 19, name: "Chicken Biryani", price: 269, img: "ii.jpg" },
+      { id: 20, name:"Mixed Biryani", price:299, img:"zz.jpg"},
+      { id: 21, name:"Mutton Biryani", price:299, img:"yams.jpg"},
+      { id: 22, name:"Chicken Friedrice", price:199, img:"33.jpg"},
+      { id: 23, name:"Chilli Chicken", price:259, img:"11.jpg"},
+      { id: 24, name:"Chicken Tandoori", price:299, img:"22.jpg"},
+    ];
+
+    let cart = [];
+    let reviews = [];
+    if (localStorage.getItem('reviews')) {
+      reviews = JSON.parse(localStorage.getItem('reviews'));
+    }
+
+    const searchInput = document.getElementById('search-input');
+
+    function renderMenu(filteredItems = menuItems) {
+      const menuDiv = document.getElementById('menu');
+      menuDiv.innerHTML = '';
+      filteredItems.forEach(item => {
+        menuDiv.innerHTML += `
+          <div class="menu-item">
+            <img src="${item.img}" alt="${item.name}">
+            <h3>${item.name}</h3>
+            <div>₹${item.price}</div>
+            <button onclick="addToCart(${item.id})">Add to Cart</button>
+          </div>
+        `;
+      });
+    }
+
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      const filtered = menuItems.filter(item => item.name.toLowerCase().includes(query));
+      renderMenu(filtered);
+    });
+
+    window.addToCart = function(id) {
+      const item = menuItems.find(m => m.id === id);
+      const existing = cart.find(ci => ci.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cart-list');
+      const totalDiv = document.getElementById('cart-total');
+      list.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        total += item.price * item.qty;
+        list.innerHTML += `<li>${item.name} x ${item.qty} - ₹${item.price * item.qty}
+          <button onclick="removeFromCart(${item.id})" style="margin-left:8px;background:#e53935;color:#fff;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;">Remove</button>
+        </li>`;
+      });
+      totalDiv.textContent = `Total: ₹${total}`;
+      document.getElementById('checkout-btn').disabled = cart.length === 0;
+    }
+
+    window.removeFromCart = function(id) {
+      cart = cart.filter(item => item.id !== id);
+      renderCart();
+    }
+
+    const paymentModal = document.getElementById('payment-modal');
+    const paymentSuccess = document.getElementById('payment-success');
+
+    document.getElementById('checkout-btn').onclick = function() {
+      paymentModal.classList.remove('hidden');
+    };
+
+    window.closePayment = function() {
+      paymentModal.classList.add('hidden');
+    };
+
+    document.getElementById('payment-form').onsubmit = function(e) {
+      e.preventDefault();
+      paymentModal.classList.add('hidden');
+      paymentSuccess.classList.remove('hidden');
+      cart = [];
+      renderCart();
+      setTimeout(() => paymentSuccess.classList.add('hidden'), 3500);
+    };
+
+    function renderReviews() {
+      const reviewsDiv = document.getElementById('reviews');
+      reviewsDiv.innerHTML = reviews.length === 0
+        ? "<em>No reviews yet. Be the first to write!</em>"
+        : reviews.map(r => `<div class="review">${r}</div>`).join('');
+    }
+
+    document.getElementById('feedback-form').onsubmit = function(e) {
+      e.preventDefault();
+      const textarea = this.querySelector('textarea');
+      if (textarea.value.trim()) {
+        reviews.unshift(textarea.value.trim());
+        localStorage.setItem('reviews', JSON.stringify(reviews));
+        renderReviews();
+        textarea.value = '';
+      }
+    };
+
+    // Show welcome message after login or page load
+    function showWelcomeMessage(username = 'User') {
+      const welcomeDiv = document.getElementById('WelcomeMessage'); // Fixed casing here
+      welcomeDiv.textContent = `Hi, Welcome ${username}!`;
+    }
+
+    // Show welcome message (you can replace 'Foodie Lovers' with logged-in user name)
+    showWelcomeMessage('Foodie Lovers');
+
+    renderMenu();
+    renderCart();
+    renderReviews();
+  </script>
+</body>
+</html>
